@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PLATFORM_CREATOR  // Creador de Empresas (Administrador de la plataforma)
+  COMPANY_ADMIN     // Administrador de Empresa
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  password      String?
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          Role      @default(COMPANY_ADMIN)
+  banned        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  createdCompanies Company[] @relation("CompanyCreator")
+  adminCompanies   Company[] @relation("CompanyAdmins")
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Company {
+  id                String   @id
+  name              String
+  nit               String   @unique
+  address           String?
+  phone             String?
+  active            Boolean  @default(true)
+  activities        String[] @default([])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  creatorId         String
+  creator           User     @relation("CompanyCreator", fields: [creatorId], references: [id])
+  admins            User[]   @relation("CompanyAdmins")
+
+  alerts            Alert[]
+  waterConsumptions WaterConsumption[]
+  energyConsumptions EnergyConsumption[]
+  wasteRecords      WasteRecord[]
+  complianceRecords ComplianceRecord[]
+  productionRecords ProductionRecord[]
+
+  @@map("company")
+}
+
+model WaterConsumption {
+  id           String   @id
+  amount       Float
+  dischargeCost Float   @default(0)
+  period       String
+  observations String?
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("water_consumption")
+}
+
+model EnergyConsumption {
+  id           String   @id
+  amount       Float
+  reactiveEnergyCost Float @default(0)
+  period       String
+  observations String?
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("energy_consumption")
+}
+
+model ProductionRecord {
+  id           String   @id
+  itemsCount   Int
+  period       String
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("production_record")
+}
+
+model WasteRecord {
+  id           String   @id
+  type         String   // Retal de punto, Denim, Mezclas, etc.
+  category     String?  // Conos plásticos, Papel de trazo, etc.
+  weight       Float
+  isHazardous  Boolean  @default(false)
+  status       String   @default("disponible") // disponible, gestionado, en_transito
+  productionId String?  // Orden de producción asociada
+  evidenceUrl  String?  // Foto del manifiesto o acta
+  observations String?
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("waste_record")
+}
+
+model ComplianceRecord {
+  id           String   @id
+  norm         String
+  status       String
+  percentage   Float
+  observations String?
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("compliance_record")
+}
+
+model Alert {
+  id           String   @id
+  type         String
+  message      String
+  level        String   @default("info")
+  read         Boolean  @default(false)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("alert")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
