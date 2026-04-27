@@ -1,1 +1,1 @@
-export { getSession, logoutAction } from "./actions";
+export { getSession, registerAction, logoutAction } from "./actions";

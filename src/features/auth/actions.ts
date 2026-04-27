@@ -25,6 +25,39 @@ export async function getSession() {
   return session;
 }
 
+export async function registerAction(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const name = formData.get("name") as string;
+  const role = formData.get("role") as string || "COMPANY_ADMIN";
+
+  try {
+    const { user } = await auth.api.signUpEmail({
+      body: {
+        email,
+        password,
+        name,
+      },
+      headers: await headers(),
+    });
+
+    if (user) {
+      // Forzar el rol en la base de datos después de la creación
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          role: role as any,
+        },
+      });
+      return { success: true };
+    }
+    return { error: "Error al crear el usuario" };
+  } catch (error) {
+    console.error("Register error:", error);
+    return { error: (error as Error).message || "Error al crear el usuario" };
+  }
+}
+
 export async function logoutAction() {
   await auth.api.signOut({
     headers: await headers(),

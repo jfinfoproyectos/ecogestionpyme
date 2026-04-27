@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { authClient } from "@/features/auth/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { registerAction } from "@/features/auth/services";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,21 +30,14 @@ export default function RegisterPage() {
       return;
     }
 
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const role = formData.get("role") as string || "COMPANY_ADMIN";
-
     try {
-      const { data, error } = await authClient.signUp.email({
-        email,
-        password,
-        name,
-        role,
-        callbackURL: "/dashboard",
-      } as any);
+      const result = await registerAction(formData);
 
-      if (error) {
-        setError(error.message || "Error al crear el usuario");
+      if (result.error) {
+        setError(result.error);
+      } else {
+        router.push("/dashboard");
+        router.refresh();
       }
     } catch {
       setError("Error al conectar con el servidor");

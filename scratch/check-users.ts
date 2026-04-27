@@ -1,6 +1,5 @@
-import { PrismaClient } from "./src/generated/prisma/client";
-
-const prisma = new PrismaClient();
+import "dotenv/config";
+import prisma from "../src/shared/lib/prisma";
 
 async function checkUsers() {
   const users = await prisma.user.findMany();

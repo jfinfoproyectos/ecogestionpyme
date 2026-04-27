@@ -11,20 +11,10 @@ export const auth = betterAuth({
     enabled: true,
   },
   user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        required: false,
-        input: true,
-      },
-    },
+    additionalFields: {},
   },
   session: {
-    additionalFields: {
-      role: {
-        type: "string",
-      },
-    },
+    additionalFields: {},
   },
   plugins: [
     admin({
