@@ -68,7 +68,7 @@ model WaterConsumption {
   period       String
   observations String?
   companyId    String
-  company      Company  @relation(fields: [companyId], references: [id])
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -82,7 +82,7 @@ model EnergyConsumption {
   period       String
   observations String?
   companyId    String
-  company      Company  @relation(fields: [companyId], references: [id])
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -94,7 +94,7 @@ model ProductionRecord {
   itemsCount   Int
   period       String
   companyId    String
-  company      Company  @relation(fields: [companyId], references: [id])
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -112,7 +112,7 @@ model WasteRecord {
   evidenceUrl  String?  // Foto del manifiesto o acta
   observations String?
   companyId    String
-  company      Company  @relation(fields: [companyId], references: [id])
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -126,7 +126,7 @@ model ComplianceRecord {
   percentage   Float
   observations String?
   companyId    String
-  company      Company  @relation(fields: [companyId], references: [id])
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -140,7 +140,7 @@ model Alert {
   level        String   @default("info")
   read         Boolean  @default(false)
   companyId    String
-  company      Company  @relation(fields: [companyId], references: [id])
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
